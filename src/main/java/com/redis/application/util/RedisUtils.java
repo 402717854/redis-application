@@ -199,6 +199,15 @@ public final class RedisUtils {
         }
 
     }
+    public static void hmSetAll(String key, Map<?,?> var2) {
+        try {
+            HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
+            hash.putAll(key, var2);
+        } catch (Exception e) {
+            log.error("Redis添加哈希出现异常:", e);
+            throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
+        }
+    }
     /**
      * 哈希 添加 重写将hashKey转为String
      * @param key
@@ -384,7 +393,16 @@ public final class RedisUtils {
         }
 
     }
+    public static void setAdds(String key, Object ... value) {
 
+        try {
+            SetOperations<String, Object> set = redisTemplate.opsForSet();
+            set.add(key, value);
+        } catch (Exception e) {
+            log.error("Redis添加set出现异常:", e);
+            throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
+        }
+    }
     /**
      * 集合获取
      * @param key
@@ -411,6 +429,7 @@ public final class RedisUtils {
         try {
             SetOperations<String, Object> set = redisTemplate.opsForSet();
             return set.isMember(key, value);
+
         } catch (Exception e) {
             log.error("Redis检查集合中是否存在该值出现异常:", e);
             throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
