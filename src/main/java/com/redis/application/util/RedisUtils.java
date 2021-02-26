@@ -82,7 +82,7 @@ public final class RedisUtils {
      * @param value
      * @return
      */
-    public static boolean set(final String key, Object value, Long expireTime,
+    public static boolean setEX(final String key, Object value, Long expireTime,
                               TimeUnit timeUnit) {
         try {
             ValueOperations<Serializable, Object> operations = redisTemplate.opsForValue();
@@ -102,13 +102,27 @@ public final class RedisUtils {
      */
     public static boolean setEX(final String key, Object value, Long expireTime) {
         try {
-            return set(key, value, expireTime, TimeUnit.MILLISECONDS);
+            return setEX(key, value, expireTime, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("Redis写入缓存设置时效时间默认毫秒出现异常:", e);
             throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
         }
     }
 
+    /**
+     * 获取缓存存续时间
+     * @param key
+     * @param timeUnit
+     * @return
+     */
+    public static Long getExpire(final String key, TimeUnit timeUnit){
+        try {
+            return redisTemplate.getExpire(key,TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("Redis获取缓存存续时间出现异常:", e);
+            throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
+        }
+    }
     /**
      * 批量删除对应的value
      * @param keys

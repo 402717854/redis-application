@@ -47,7 +47,7 @@ public class SensitiveWordRedisFilter implements CommandLineRunner {
         log.info("=========敏感词加载开始=========");
         long start = System.currentTimeMillis();
         RedisUtils.lock(REDIS_SENSITIVE_WORD_LOCK,start+"",REDIS_SENSITIVE_WORD_LOCK_TIMEOUT);
-        InputStreamReader inputStreamReader = new InputStreamReader(SensitiveWordRedisFilter.class.getClassLoader().getResourceAsStream("sensi_words.txt"), StandardCharsets.UTF_8);
+        InputStreamReader inputStreamReader = new InputStreamReader(SensitiveWordRedisFilter.class.getClassLoader().getResourceAsStream("sensi_words2.txt"), StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(inputStreamReader);
         try{
             Set<Object> sensitiveWordSet=new HashSet<Object>();
