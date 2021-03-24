@@ -323,16 +323,18 @@ public final class RedisUtils {
      * @param k
      * @param v
      */
-    public static void rPush(String k, Object v) {
+    public static Long rPush(String k, Object v) {
         try {
             ListOperations<String, Object> list = redisTemplate.opsForList();
-            list.rightPush(k, v);
+            Long aLong = list.rightPush(k, v);
+            return aLong;
         } catch (Exception e) {
             log.error("Redis添加list出现异常:", e);
             throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
         }
 
     }
+
     public static void rPushAll(String k, Collection<Object> values) {
         try {
             ListOperations<String, Object> list = redisTemplate.opsForList();
@@ -342,6 +344,22 @@ public final class RedisUtils {
             throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
         }
 
+    }
+
+    /**
+     * 获取队列长度
+     * @param k
+     * @return
+     */
+    public static Long listSize(String k) {
+        try {
+            ListOperations<String, Object> list = redisTemplate.opsForList();
+            Long size = list.size(k);
+            return size;
+        } catch (Exception e) {
+            log.error("Redis添加list出现异常:", e);
+            throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
+        }
     }
     public static Object rightPopTimeOut(String k, long time,TimeUnit timeUnit) {
         try {
@@ -659,6 +677,20 @@ public final class RedisUtils {
     public static Long increment(final String key) {
         try {
             return redisTemplate.opsForValue().increment(key, 1);
+        } catch (Exception e) {
+            log.error("Redis自增1出现异常:", e);
+            throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
+        }
+    }
+
+    /**
+     * 自减
+     * @param key
+     * @return
+     */
+    public static Long decrement(final String key) {
+        try {
+            return redisTemplate.opsForValue().decrement(key, 1);
         } catch (Exception e) {
             log.error("Redis自增1出现异常:", e);
             throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);

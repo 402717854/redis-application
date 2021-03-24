@@ -22,15 +22,20 @@ public class RedisLock {
             @Override
             public void run() {
                 while (threadState) {
-                    Long expire1 = RedisUtils.getExpire(key, TimeUnit.MILLISECONDS);
-                    if (expire1 <=0) {
-                        log.info("异步暂停线程");
+                    try{
+                        Long expire1 = RedisUtils.getExpire(key, TimeUnit.MILLISECONDS);
+                        if (expire1 <=0) {
+                            log.info("异步暂停线程");
+                            threadState=Boolean.FALSE;
+                        }
+                        log.info("lock存在剩余时间:{}",expire1);
+                        if (expire1> 1000 && expire1< 2000) {
+                            log.info("异步线程续航lock");
+                            RedisUtils.expire(key, expire);
+                        }
+                    }catch (Exception e){
                         threadState=Boolean.FALSE;
-                    }
-                    log.info("lock存在剩余时间:{}",expire1);
-                    if (expire1> 1000 && expire1< 2000) {
-                        log.info("异步线程续航lock");
-                        RedisUtils.expire(key, expire);
+                        log.error("异步线程续航lock出错",e);
                     }
                 }
             }

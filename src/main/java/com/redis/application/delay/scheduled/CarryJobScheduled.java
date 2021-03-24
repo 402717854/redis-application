@@ -22,7 +22,7 @@ public class CarryJobScheduled {
      */
     @Scheduled(cron = "*/1 * * * * *")
     public void carryJobToQueue() {
-        log.info("启动搬运线程carryJobToQueue --->");
+//        log.info("启动搬运线程carryJobToQueue --->");
         try {
             boolean lockFlag = RedisUtils.lock(RedisQueueKey.CARRY_THREAD_LOCK, "1", RedisQueueKey.LOCK_WAIT_TIME);
             if (!lockFlag) {
