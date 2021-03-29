@@ -20,8 +20,8 @@ public class ActivityServiceImpl implements ActivityService {
 
         //2、判断活动是否开始
         long time = new Date().getTime();
-        Long startTime = (Long) RedisUtils.hmGet("activity-" + activityId, "startTime");
-        Long endTime = (Long) RedisUtils.hmGet("activity-" + activityId, "endTime");
+        Long startTime = (Long) RedisUtils.hmGet("activity:" + activityId, "startTime");
+        Long endTime = (Long) RedisUtils.hmGet("activity:" + activityId, "endTime");
         if(time<startTime){
             System.out.println("活动未开始");
            return;
@@ -30,7 +30,7 @@ public class ActivityServiceImpl implements ActivityService {
             System.out.println("活动已结束");
            return;
         }
-        SeckillStatus checkSeckillStatus = (SeckillStatus) RedisUtils.hmGet("seckillGoods_isBuying_" + activityId, userId);
+        SeckillStatus checkSeckillStatus = (SeckillStatus) RedisUtils.hmGet("secKillGoods_isBuying:activityId_" + activityId, userId);
         if(checkSeckillStatus!=null){
             //3、判断用户在此活动中是否存在未支付的订单
             if(checkSeckillStatus.getStatus()==2){
@@ -44,27 +44,27 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }
         //5、判断是否有库存
-        Integer stock = (Integer) RedisUtils.get("seckillGoods_stock_" + activityId + ":goodsId-" + goodsId);
+        Integer stock = (Integer) RedisUtils.get("secKillGoods_stock:activityId_" + activityId + ":goodsId_" + goodsId);
         if(stock<=0){
-            System.out.println(userId+"123活动商品已售罄");
+            System.out.println(userId+"abc活动商品已售罄"+stock);
             return;
         }
-        Long aLong = RedisUtils.listSize("seckillGoods_Order_Queue_Up" + activityId);
+        Long aLong = RedisUtils.listSize("secKillGoods_Order_Queue_Up:activityId_" + activityId);
         if(aLong>stock){
-            System.out.println(userId+"查询排队抢购失败");
+            System.out.println(userId+"查询排队抢购失败,队列长度:"+aLong+",库存:"+stock);
             return;
         }
         //6、放入redis抢购队列中
         //创建秒杀队列数据，秒杀排队
         SeckillStatus seckillStatus = new SeckillStatus(userId, new Date(), 1, goodsId);
-        Long listSize = RedisUtils.rPush("seckillGoods_Order_Queue_Up" + activityId, seckillStatus);
-        System.out.println("抢购队列长度"+listSize);
+        Long listSize = RedisUtils.rPush("secKillGoods_Order_Queue_Up:activityId_" + activityId, seckillStatus);
         if(listSize>stock){
-            System.out.println(userId+"排队抢购失败");
+            //需要对队列进行清空补偿机制
+            System.out.println(userId+"排队抢购失败,队列长度:"+listSize+",库存:"+stock);
             return;
         }
         //7、设置用户正在抢购商品
-        RedisUtils.hmSet("seckillGoods_isBuying_" + activityId, userId,seckillStatus);
+        RedisUtils.hmSet("secKillGoods_isBuying:activityId_" + activityId, userId,seckillStatus);
         //8、异步下单
         multiThreadingCreateOrder.createOrder(activityId);
     }
