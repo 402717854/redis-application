@@ -43,6 +43,7 @@ public class ActivityServiceImpl implements ActivityService {
                 return;
             }
         }
+
         //5、判断是否有库存
         Integer stock = (Integer) RedisUtils.get("secKillGoods_stock:activityId_" + activityId + ":goodsId_" + goodsId);
         if(stock<=0){

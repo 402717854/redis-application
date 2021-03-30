@@ -764,4 +764,24 @@ public final class RedisUtils {
             throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
         }
     }
+
+    /**
+     * 防止自减为负数
+     * @param key
+     */
+    public static Object safeDecrement(String key) {
+        try {
+            String luaScript = "local num=redis.call('get', KEYS[1]) if tonumber(num)>0 then return redis" +
+                    ".call('decr', KEYS[1]) else return -1 end";
+            DefaultRedisScript<Long> defaultRedisScript = new DefaultRedisScript<>();
+            defaultRedisScript.setResultType(Long.class);
+            defaultRedisScript.setScriptText(luaScript);
+            Object execute = stringRedisTemplate.execute(defaultRedisScript,
+                    Arrays.asList(key));
+            return execute;
+        } catch (Exception e) {
+            log.error("Redis防止自减为负数出现异常:", e);
+            throw new OperationException(GlobalExceptionEnum.SYSTEM_ERROR);
+        }
+    }
 }

@@ -16,12 +16,11 @@ public class MultiThreadingCreateOrder {
         if(seckillStatus!=null&&seckillStatus.getStatus()==1){
             Integer userId = seckillStatus.getUserId();
             Long increment = RedisUtils.decrement("secKillGoods_stock:activityId_" + activityId + ":goodsId_" + seckillStatus.getGoodsId());
-            System.out.println(userId+"商品库存剩余"+increment);
             if(increment<0){
                 //秒杀失败
                 seckillStatus.setStatus(4);
                 RedisUtils.hmSet("secKillGoods_isBuying:activityId_"+activityId,seckillStatus.getUserId(),seckillStatus);
-                System.out.println(userId+"已售罄!");
+                System.out.println(userId+"商品库存剩余"+increment+"已售罄!");
                 return;
             }
             if(increment==0){

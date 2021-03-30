@@ -1,6 +1,7 @@
 package com.redis.application.seckill.controller;
 
 import com.redis.application.seckill.service.ActivityService;
+import com.redis.application.seckill.service.SecKillService;
 import com.redis.application.util.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,8 @@ public class ActivityController {
 
     @Autowired
     private ActivityService activityService;
+    @Autowired
+    private SecKillService secKillService;
 
     @GetMapping("secKillThread")
     public void secKillOrderThread(){
@@ -23,7 +26,7 @@ public class ActivityController {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    activityService.activityOrder(123l,456, finalI);
+                    secKillService.activityOrder(123l,456, finalI);
                 }
             });
             thread.start();
@@ -42,5 +45,19 @@ public class ActivityController {
     @GetMapping("secKill")
     public void secKillOrder(){
         activityService.activityOrder(123l,456, 123456);
+    }
+    @GetMapping("testDecrement")
+    public void testDecrement(){
+        RedisUtils.set("testDecrement",20l);
+        for (int i = 0; i < 50; i++) {
+            int finalI = i;
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    RedisUtils.safeDecrement("testDecrement");
+                }
+            });
+            thread.start();
+        }
     }
 }
