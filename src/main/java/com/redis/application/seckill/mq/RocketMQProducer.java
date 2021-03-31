@@ -23,6 +23,8 @@ public class RocketMQProducer {
         sender.setNamesrvAddr(nameServer);
         sender.setInstanceName(UUID.randomUUID().toString());
         sender.setSendMsgTimeout(10000);
+        //同步模式下发送消息的次数
+        sender.setRetryTimesWhenSendFailed(0);
         try {
             sender.start();
         } catch (MQClientException e) {
@@ -36,16 +38,16 @@ public class RocketMQProducer {
         this.topics = topics;
     }
 
-    public void send(Message message) {
+    public void send(Message message) throws Exception{
 
         message.setTopic(topics);
 
-        try {
-            SendResult result = sender.send(message);
-            SendStatus status = result.getSendStatus();
+        SendResult result = sender.send(message);
+        SendStatus status = result.getSendStatus();
+        if(status.equals(SendStatus.SEND_OK)){
             System.out.println("messageId=" + result.getMsgId() + ", status=" + status);
-        } catch (Exception e) {
-            e.printStackTrace();
+        }else{
+            throw new RuntimeException("发送消息失败");
         }
     }
 }

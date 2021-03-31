@@ -53,6 +53,11 @@ public class SecKillServiceImpl implements SecKillService {
         System.out.println(userId+"MQ保证发送执行抢购订单成功消息");
         Message message = new Message();
         message.setBody(JSON.toJSONString(seckillOrder).getBytes(StandardCharsets.UTF_8));
-        rocketMQProducer.send(message);
+        try {
+            rocketMQProducer.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            RedisUtils.increment("secKillGoods_stock:activityId_" + activityId + ":goodsId_" + goodsId);
+        }
     }
 }
