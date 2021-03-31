@@ -1,15 +1,23 @@
 package com.redis.application.seckill.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.redis.application.seckill.entity.SeckillOrder;
 import com.redis.application.seckill.entity.SeckillStatus;
+import com.redis.application.seckill.mq.RocketMQProducer;
 import com.redis.application.seckill.service.SecKillService;
 import com.redis.application.util.RedisUtils;
+import org.apache.rocketmq.common.message.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
 public class SecKillServiceImpl implements SecKillService {
+
+    @Autowired
+    private RocketMQProducer rocketMQProducer;
     @Override
     public void activityOrder(Long goodsId, Integer activityId, Integer userId) {
         //1、判断用户是否登录
@@ -43,5 +51,8 @@ public class SecKillServiceImpl implements SecKillService {
         seckillOrder.setSeckillId(goodsId);
         seckillOrder.setCreateTime(new Date());
         System.out.println(userId+"MQ保证发送执行抢购订单成功消息");
+        Message message = new Message();
+        message.setBody(JSON.toJSONString(seckillOrder).getBytes(StandardCharsets.UTF_8));
+        rocketMQProducer.send(message);
     }
 }
